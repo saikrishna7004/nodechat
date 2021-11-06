@@ -1,7 +1,7 @@
 // Node server which will handle socket io connections
 const express = require('express')
 app = express()
-server = require('http').createServer(app)
+server = require('http').Server(app)
 const io = require('socket.io')(server)
 server.listen(20538)
 console.log("Server started on port: 8000")
