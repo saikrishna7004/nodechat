@@ -2,8 +2,8 @@
 const express = require('express')
 app = express()
 server = require('http').createServer(app)
-server.listen(8000)
 const io = require('socket.io')(server)
+server.listen(8000)
 console.log("Server started on port: 8000")
 
 const users = {};
