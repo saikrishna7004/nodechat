@@ -1,5 +1,9 @@
 // Node server which will handle socket io connections
-const io = require('socket.io')(8000)
+const express = require('express')
+app = express()
+server = require('http').createServer(app)
+server.listen(8000)
+const io = require('socket.io')(server)
 console.log("Server started on port: 8000")
 
 const users = {};
