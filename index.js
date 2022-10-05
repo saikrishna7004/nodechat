@@ -5,6 +5,8 @@ http = require('http').createServer(app)
 const io = require('socket.io')(http)
 const PORT = process.env.PORT || 8000
 
+
+
 http.listen(PORT, function() {
     console.log("Server started on PORT: 8000")
 })
@@ -22,12 +24,22 @@ io.on('connection', socket =>{
     // If someone sends a message, broadcast it to other people
     socket.on('send', message =>{
         socket.broadcast.emit('receive', {message: message, name: users[socket.id]})
+        
     });
 
     // If someone leaves the chat, let others know 
     socket.on('disconnect', message =>{
         socket.broadcast.emit('left', users[socket.id]);
         delete users[socket.id];
+    });
+
+    socket.on('new_notification', function( data ) {
+        console.log(data.title, data.message);
+        io.sockets.emit('show_notification', { 
+            title: data.title, 
+            message: data.message, 
+            icon: data.icon, 
+        });
     });
 
 })
