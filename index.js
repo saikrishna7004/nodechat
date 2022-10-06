@@ -16,14 +16,14 @@ const users = {};
 io.on('connection', socket =>{
 
     // If any new user joins, let other users connected to the server know!
-    socket.on('new-user-joined', name =>{ 
+    socket.on('new-user-joined', (name, peerId) =>{ 
         users[socket.id] = name;
-        socket.broadcast.emit('user-joined', name);
+        socket.broadcast.emit('user-joined', name, peerId);
     });
 
     // If someone sends a message, broadcast it to other people
-    socket.on('send', message =>{
-        socket.broadcast.emit('receive', {message: message, name: users[socket.id]})
+    socket.on('send', (message, peerId) =>{
+        socket.broadcast.emit('receive', {message: message, name: users[socket.id], peerId: peerId})
         
     });
 
@@ -41,5 +41,15 @@ io.on('connection', socket =>{
             icon: data.icon, 
         });
     });
+
+    socket.on('join-room', (roomId, userId) => {
+        socket.join(roomId)
+        socket.to(roomId).emit('user-connected', userId)
+        console.log(roomId, userId)
+
+        socket.on('disconnect', () => {
+            socket.to(roomId).emit('user-disconnected', userId)
+        })
+    })
 
 })
