@@ -13,14 +13,14 @@ const users = {};
 io.on('connection', socket =>{
 
     // If any new user joins, let other users connected to the server know!
-    socket.on('new-user-joined', (name, userId, roomId, peerId) =>{ 
+    socket.on('new-user-joined', ({name, userId, roomId, peerId, ...data}) =>{ 
         users[socket.id] = name;
         socket.join(roomId);
-        socket.broadcast.to(roomId).emit('user-joined', name, userId, peerId);
+        socket.broadcast.to(roomId).emit('user-joined', {name, userId, peerId});
     });
 
     // If someone sends a message, broadcast it to other people
-    socket.on('send', (message, roomId, peerId) =>{
+    socket.on('send', ({message, roomId, peerId, ...data}) =>{
         socket.broadcast.to(roomId).emit('receive', {message: message, name: users[socket.id], userId: socket.id, peerId: peerId})
         console.log(socket.id, "sent msg")
     });
@@ -49,7 +49,7 @@ io.on('connection', socket =>{
         io.to(userId).emit('reject-call');
     })
 
-    socket.on('join-room', (roomId, userId) => {
+    socket.on('join-room', ({roomId, userId, ...data}) => {
         socket.join(roomId)
         socket.to(roomId).emit('user-connected', userId)
         console.log(roomId, userId)
