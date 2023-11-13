@@ -9,6 +9,7 @@ http.listen(PORT, function() {
 });
 
 const users = {};
+const engagedInCall = {};
 
 io.on('connection', socket =>{
 
@@ -48,6 +49,30 @@ io.on('connection', socket =>{
         console.log('reject-call', userId)
         io.to(userId).emit('reject-call');
     })
+
+    socket.on('make-call-check', (d)=>{
+        console.log("MAke call check ", d)
+        const {myUserId, toUserId, to, username} = d
+        console.log('make-call-check', username, " to ", to);
+        console.log(engagedInCall)
+
+        if (engagedInCall[toUserId]) {
+            console.log("Other call")
+            io.to(myUserId).emit('caller-other-call');
+        } else {
+            console.log("Making call to ", to)
+            io.to(myUserId).emit('make-call');
+            engagedInCall[myUserId] = toUserId;
+            engagedInCall[toUserId] = myUserId;
+        }
+    })
+
+    socket.on('call-ended', ({ userId, otherUserId }) => {
+        delete engagedInCall[userId];
+        delete engagedInCall[otherUserId];
+        io.to(otherUserId).emit('call-ended');
+        // Add any necessary logic to inform users about the call ending.
+    });
 
     socket.on('join-room', ({roomId, userId, ...data}) => {
         socket.join(roomId)
